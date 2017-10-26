@@ -56,8 +56,10 @@ def dump_dialogs(vk_api, user_id, dphoto, count_users):
 		response = vk_api.messages.getDialogs(count=count_users, offset=offset)
 		dialogs = response[1:]
 		all_dialogs.append(dialogs)
-
 		if len(dialogs) == 0:
+			break
+
+		if offset >= int(count_users):
 			break
 
 		path_to_res = './result'
@@ -91,7 +93,7 @@ def dump_dialogs(vk_api, user_id, dphoto, count_users):
 
 			dump_dialog_history(vk_api, id_to_dump, is_multichat, newpath, dphoto)
 
-		offset += 200
+		offset += int(count_users)
 		sleep()
 
 	print('Done')
@@ -167,7 +169,7 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, pat
 		attatchments = message['attachments']
 		for attatchment in attatchments:
 			if attatchment['type'] == 'photo':
-				photo_url = attatchment['photo']['src_big']
+				photo_url = attatchment['photo']['src_xxbig']
 
 				photos_file.write(photo_url + '\n')
 				history_file.write(photo_url + '\n')
