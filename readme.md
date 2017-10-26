@@ -17,3 +17,11 @@ login with token:
 dump history of specific account:
 	vk_dump.py -id <id_of_account>
 ```
+```
+dump count users:
+	vk_dump.py -c 10
+```
+```
+dump photo:
+	vk_dump.py -dp 1
+```

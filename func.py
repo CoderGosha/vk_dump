@@ -1,9 +1,14 @@
 import datetime
 import time
 import os
-import vk 
+import urllib
+
+import vk
 
 # returns obj to access api
+import wget as wget
+
+
 def auth(vk_token, vk_login, vk_password):
 	vk_api = None
 
@@ -42,13 +47,13 @@ def dump_friends(vk_api, user_id):
 
 	print('Done\n')
 
-def dump_dialogs(vk_api, user_id):
+def dump_dialogs(vk_api, user_id, dphoto, count_users):
 	print('dumping dialogs...')
 	offset = 0
 
 	all_dialogs = []
 	while True:
-		response = vk_api.messages.getDialogs(count=200, offset=offset)
+		response = vk_api.messages.getDialogs(count=count_users, offset=offset)
 		dialogs = response[1:]
 		all_dialogs.append(dialogs)
 
@@ -84,14 +89,14 @@ def dump_dialogs(vk_api, user_id):
 			if need_sleep:
 				sleep()
 
-			dump_dialog_history(vk_api, id_to_dump, is_multichat, newpath)
+			dump_dialog_history(vk_api, id_to_dump, is_multichat, newpath, dphoto)
 
 		offset += 200
 		sleep()
 
 	print('Done')
 
-def dump_dialog_history(vk_api, user_id, is_multichat, path):
+def dump_dialog_history(vk_api, user_id, is_multichat, path, dphoto):
 	offset = 0
 	all_messages = []
 	all_user_ids = set()
@@ -151,13 +156,13 @@ def dump_dialog_history(vk_api, user_id, is_multichat, path):
 			from_user['first_name'] + ' ' + from_user['last_name'] + ': ' 
 			+ message['body'] + '\n')
 
-		dump_attachments(vk_api, message, history_file, photos_file, vieos_file)
+		dump_attachments(vk_api, message, history_file, photos_file, vieos_file, path, dphoto)
 
 	history_file.close()
 	photos_file.close()
 	vieos_file.close()
 
-def dump_attachments(vk_api, message, history_file, photos_file, vieos_file):
+def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, path, dphoto):
 	try:
 		attatchments = message['attachments']
 		for attatchment in attatchments:
@@ -166,6 +171,9 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file):
 
 				photos_file.write(photo_url + '\n')
 				history_file.write(photo_url + '\n')
+				if dphoto is not None:
+					download_photo(path, photo_url)
+
 			elif attatchment['type'] == 'video':
 				video = vk_api.video.get(videos=
 					str(attatchment['video']['owner_id']) + '_' +
@@ -179,8 +187,18 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file):
 				vieos_file.write(video_url + '\n')
 				history_file.write(video_url + '\n')		
 	except:
+
 		return
 
 # default sleep time
 def sleep():
 	time.sleep(1)
+
+
+def download_photo(path, photo_url):
+	if not os.path.exists(path + '/photo'):
+		os.makedirs(path + '/photo')
+	file_name = photo_url[str(photo_url).rfind("/") + 1: len(photo_url)]
+	newpath = path + "/photo/" + file_name
+	#print(newpath)
+	wget.download(photo_url, newpath)
