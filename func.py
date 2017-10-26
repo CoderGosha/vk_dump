@@ -145,7 +145,7 @@ def dump_dialog_history(vk_api, user_id, is_multichat, path, dphoto):
 	history_file = open(path + '/history.txt', 'w')
 	photos_file = open(path + '/photos.txt', 'w')
 	vieos_file = open(path + '/videos.txt', 'w')
-	create_html_images(path)
+	create_html_images(path, user)
 
 	for message in all_messages:
 		from_user = all_users[message['from_id']]
@@ -196,18 +196,21 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, pat
 
 		return
 
-def create_html_images(path):
+def create_html_images(path, uid):
 	photo_html = open(path + '/photo.html', 'w')
 	str = """
 	<!DOCTYPE html>
 	<html>
+	 <head>
+	  <meta charset="utf-8">
+	 </head>
 	<body>
 	
-	<h1>Dump Photo</h1>
+	<h1>Dump Photo: %s</h1>
 	
 	<p>Users photo</p>
 	
-	"""
+	""" %uid
 
 	photo_html.write(str + '\n')
 	photo_html.close()
