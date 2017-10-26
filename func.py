@@ -145,6 +145,7 @@ def dump_dialog_history(vk_api, user_id, is_multichat, path, dphoto):
 	history_file = open(path + '/history.txt', 'w')
 	photos_file = open(path + '/photos.txt', 'w')
 	vieos_file = open(path + '/videos.txt', 'w')
+	create_html_images(path)
 
 	for message in all_messages:
 		from_user = all_users[message['from_id']]
@@ -163,6 +164,7 @@ def dump_dialog_history(vk_api, user_id, is_multichat, path, dphoto):
 	history_file.close()
 	photos_file.close()
 	vieos_file.close()
+	closing_html_images(path)
 
 def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, path, dphoto):
 	try:
@@ -175,6 +177,8 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, pat
 				history_file.write(photo_url + '\n')
 				if dphoto is not None:
 					download_photo(path, photo_url)
+
+				add_html_images(path, photo_url)
 
 			elif attatchment['type'] == 'video':
 				video = vk_api.video.get(videos=
@@ -191,6 +195,46 @@ def dump_attachments(vk_api, message, history_file, photos_file, vieos_file, pat
 	except:
 
 		return
+
+def create_html_images(path):
+	photo_html = open(path + '/photo.html', 'w')
+	str = """
+	<!DOCTYPE html>
+	<html>
+	<body>
+	
+	<h1>Dump Photo</h1>
+	
+	<p>Users photo</p>
+	
+	"""
+
+	photo_html.write(str + '\n')
+	photo_html.close()
+
+
+def closing_html_images(path):
+	photo_html = open(path + '/photo.html', 'a')
+	str = """
+	</body>
+	</html>
+
+	"""
+	photo_html.write(str + '\n')
+	photo_html.close()
+
+
+def add_html_images(path, url):
+	photo_html = open(path + '/photo.html', 'a')
+	str = """
+	<img src="%s">
+
+	""" %url
+	photo_html.write(str + '\n')
+	photo_html.close()
+
+
+
 
 # default sleep time
 def sleep():
